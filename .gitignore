@@ -2,7 +2,6 @@ target
 lib_managed
 *.iml
 dist
-build
 TAGS
 etags
 project/boot/*
