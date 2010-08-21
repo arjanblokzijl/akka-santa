@@ -6,5 +6,4 @@ build
 TAGS
 etags
 project/boot/*
-*/project/build/target
 project/plugins/project
