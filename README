@@ -1,0 +1,2 @@
+Simon Peyton Jones Santa Claus example using Haskell's STM
+This little project tries out the same idea using Akka, which uses Multiverse as STM
