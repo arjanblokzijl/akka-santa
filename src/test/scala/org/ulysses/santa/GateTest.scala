@@ -63,37 +63,5 @@ class GateTest extends Specification with Logging {
       g.passGate
     }
   }
-
 }
-//  @Test
-//  def shouldFailWhenNoCapacityLeft = {
-//    val g = Gate.newGate(1)
-//    g.passGate
-//    assert(0 === g.getRemaining)
-//    try {
-//      g.passGate
-//      fail("Should fail when capacity is zero")
-//    } catch {case e: RuntimeException => {}} //expected
-//  }
-//
-//  @Test
-//  def shouldOperateWhenEveryoneJoined = {
-//    val doneSignal = new CountDownLatch(3);
-//    val waitSignal = new CountDownLatch(2);
-//    val opWaitSignal = new CountDownLatch(0);
-//
-//    val g = Gate.newGate(2)
-//    new Thread(new Worker(opWaitSignal, doneSignal, op(g))).start
-//    Thread.sleep(10)
-//
-//    new Thread(new Worker(waitSignal, doneSignal, pass(g))).start
-//    new Thread(new Worker(waitSignal, doneSignal, pass(g))).start
-//    log.debug("countDown for workers started")
-//    waitSignal.countDown
-//    waitSignal.countDown
-//
-//    doneSignal.await()
-//    log.debug("doneSignal has finished")
-//    assert(0 === g.getRemaining)
-//  }
-//
+

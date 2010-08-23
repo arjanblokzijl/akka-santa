@@ -2,7 +2,7 @@ package org.ulysses.santa
 
 import se.scalablesolutions.akka.util.Logging
 import se.scalablesolutions.akka.stm.Ref;
-import se.scalablesolutions.akka.stm.Transaction.Local._
+import se.scalablesolutions.akka.stm.local._
 
 /**
  * Created by IntelliJ IDEA.
