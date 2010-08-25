@@ -23,29 +23,32 @@ object Group {
 }
 
 case class Group(ref: Ref[(Int, Gate, Gate)]) extends Logging {
-  implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, timeout = 600 seconds)
-  def joinGroup(): (Gate, Gate) = {
+  implicit val txFactory = TransactionFactory(blockingAllowed = true, timeout = 10 seconds)
+  def joinGroup: (Gate, Gate) = {
     atomic {
       val n_left = ref.get._1
-      log.debug("found n_left: " + n_left)
-      if (n_left <= 0) retry
+      if (n_left <= 0) {
+        log.debug("Group's capacity is zero retrying transaction...")
+        //Thread.sleep(100)
+        retry
+      }
       else {
         val n_l_rem: Int = n_left - 1
-        ref.swap(n_l_rem, ref.get._2, ref.get._3)
-        log.deubg("finished swapping n_left with: " + n_l_rem)
+        ref.set(n_l_rem, ref.get._2, ref.get._3)
+        log.debug("Set remaining capacity of group to " + n_l_rem)
       }
     }
     (ref.get._2, ref.get._3)
   }
 
-  def awaitGroup(): (Gate, Gate) = {
+  def awaitGroup()(implicit tfn: String): (Gate, Gate) = {
     atomic {
       val n_left = ref.get._1
       if (n_left > 0) retry
       else {
         val g1 = ref.get._2
         val g2 = ref.get._2
-        ref.swap(n_left - 1, ref.get._2, ref.get._3)
+        ref.set(n_left - 1, ref.get._2, ref.get._3)
       }
     }
     (ref.get._2, ref.get._3)
