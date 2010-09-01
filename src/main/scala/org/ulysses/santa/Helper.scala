@@ -9,7 +9,7 @@ import se.scalablesolutions.akka.util.Logging
  * Time: 8:34:23 AM
  * To change this template use File | Settings | File Templates.
  */
-abstract class Helper(g:Group, i:Int) extends Logging with Runnable {
+abstract class Helper(g:Group, i:Int) extends Logging {
 
   def doTask(op: => Unit) = {
     log.debug("elf " + i + " is joining group")
@@ -21,18 +21,21 @@ abstract class Helper(g:Group, i:Int) extends Logging with Runnable {
 
   def passGate(g:Gate) = {
      log.debug("helper " + i + " is passing gate " + g)
+     g.passGate
   }
 }
 
 case class Elf1(g:Group, i:Int) extends Helper(g, i) with Logging {
-  def run = doTask({meetInStudy})
+  var metInStudy = 0
+  def tryMeet = super.doTask({meetInStudy})
   def meetInStudy = {
     log.info("Elf " + i + " is meeting in study")
+    metInStudy += 1
   }
 }
 
 case class Reindeer1(g:Group, i:Int) extends Helper(g, i) with Logging {
-  def run = doTask({deliverToys})
+  def tryDeliver = super.doTask({deliverToys})
   
   def deliverToys = {
     log.info("Reindeer " + i + " is delivering toys")

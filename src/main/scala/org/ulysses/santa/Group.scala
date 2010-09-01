@@ -16,6 +16,7 @@ import akka.util.duration._
  */
 object Group {
   def apply(capacity: Int)(implicit tfn: String): Group = {
+    log.debug("Creating gates with capacity: " + capacity)
     val g1 = Gate(capacity)(tfn)
     val g2 = Gate(capacity)(tfn)
     Group(new Ref(capacity, g1, g2))
