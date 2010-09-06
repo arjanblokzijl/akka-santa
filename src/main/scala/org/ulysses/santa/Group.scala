@@ -15,10 +15,10 @@ import akka.util.duration._
  * To change this template use File | Settings | File Templates.
  */
 object Group {
-  def apply(capacity: Int)(implicit tfn: String): Group = {
+  def apply(capacity: Int): Group = {
     log.debug("Creating gates with capacity: " + capacity)
-    val g1 = Gate(capacity)(tfn)
-    val g2 = Gate(capacity)(tfn)
+    val g1 = Gate(capacity)
+    val g2 = Gate(capacity)
     Group(new Ref(capacity, g1, g2))
   }
 }
@@ -42,7 +42,7 @@ case class Group(ref: Ref[(Int, Gate, Gate)]) extends Logging {
     (ref.get._2, ref.get._3)
   }
 
-  def awaitGroup()(implicit tfn: String): (Gate, Gate) = {
+  def awaitGroup: (Gate, Gate) = {
     atomic {
       val n_left = ref.get._1
       if (n_left > 0) retry

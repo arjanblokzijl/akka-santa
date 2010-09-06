@@ -39,15 +39,14 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
   def operateGate: Unit = {
     resetGate
     waitForFull
-    log.debug("Finished operating gate")
+    log.info("Finished operating gate")
   }
 
   private def waitForFull: Unit = {
     atomic {
       val n_left: Int = remaining.get
-      log.debug("waitForFull found n_left: " + n_left)
+      log.info("waitForFull found n_left: " + n_left)
       if (n_left > 0) {
-        Thread.sleep(10)
         retry
       } else {
         log.debug("Gate is full, exiting wait ")
@@ -56,13 +55,13 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
   }
 
   private def resetGate: Unit = {
-    log.debug("Set capacity to value " + capacity)
+    log.info("Seting gate capacity to value " + capacity)
     atomic {  
       remaining.set(capacity)
     }
   }
 
-  private def isFull(implicit tfn: String): Boolean = {
+  private def isFull: Boolean = {
     atomic {
       val n_left: Int = remaining.get
       log.debug("Found n_left: " + n_left)
@@ -77,7 +76,7 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
 }
 
 object Gate {
-  def apply(capacity: Int)(implicit tfn: String): Gate = {
+  def apply(capacity: Int): Gate = {
     val ref = new Ref[Int](capacity)
     Gate(capacity, ref)
   }
