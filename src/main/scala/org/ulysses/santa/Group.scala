@@ -19,12 +19,13 @@ object Group {
     log.debug("Creating gates with capacity: " + capacity)
     val g1 = Gate(capacity)
     val g2 = Gate(capacity)
-    Group(new Ref(capacity, g1, g2))
+    Group(capacity:Int, new Ref(capacity, g1, g2))
   }
 }
 
-case class Group(ref: Ref[(Int, Gate, Gate)]) extends Logging {
-  implicit val txFactory = TransactionFactory(blockingAllowed = true, timeout = 10 seconds)
+case class Group(capacity:Int, ref: Ref[(Int, Gate, Gate)]) extends Logging {
+  implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, timeout = java.lang.Long.MAX_VALUE nanos)
+
   def joinGroup: (Gate, Gate) = {
     atomic {
       val n_left = ref.get._1
@@ -34,9 +35,9 @@ case class Group(ref: Ref[(Int, Gate, Gate)]) extends Logging {
         retry
       }
       else {
-        val n_l_rem: Int = n_left - 1
-        ref.set(n_l_rem, ref.get._2, ref.get._3)
-        log.debug("Set remaining capacity of group to " + n_l_rem)
+        val rem: Int = n_left - 1
+        ref.set(rem, ref.get._2, ref.get._3)
+        log.debug("Set remaining capacity of group to " + rem)
       }
     }
     (ref.get._2, ref.get._3)
@@ -44,14 +45,12 @@ case class Group(ref: Ref[(Int, Gate, Gate)]) extends Logging {
 
   def awaitGroup: (Gate, Gate) = {
     atomic {
-      val n_left = ref.get._1
+      val (n_left: Int, g1: Gate, g2: Gate) = (ref.get._1, ref.get._2, ref.get._3)
       if (n_left > 0) retry
       else {
-        val g1 = ref.get._2
-        val g2 = ref.get._2
-        ref.set(n_left - 1, ref.get._2, ref.get._3)
+        ref.set(capacity, Gate(capacity), Gate(capacity))
       }
+      (g1, g2)
     }
-    (ref.get._2, ref.get._3)
   }
 }

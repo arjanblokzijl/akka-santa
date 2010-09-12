@@ -1,9 +1,14 @@
 package org.ulysses.santa
 
-import se.scalablesolutions.akka.util.Logging
+
 import org.specs.Specification
 import java.util.concurrent.CountDownLatch
 import org.ulysses.santa.TestUtils._
+import se.scalablesolutions.akka
+import akka.util.Logging
+import akka.stm.Ref;
+import akka.stm.local._
+import akka.util.duration._
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,7 +23,15 @@ class HelperTest extends Specification with Logging {
 
   "an Elf" should {
     "meet in study when it can pass the gate" in {
-      val elf = Elf1(Group(1), 1)
+      val g1 = Group(1)
+      val elf = Elf1(g1, 1)
+      atomic {
+        val in  = g1.ref.get._2
+        val out  = g1.ref.get._3
+        in.remaining.set(1)
+        out.remaining.set(1)
+      }
+
       elf.doTask({elf.meetInStudy})
       elf.metInStudy must be equalTo (1)
     }

@@ -1,6 +1,9 @@
 package org.ulysses.santa
 
 import scala.util.Random
+import org.slf4j.LoggerFactory
+import org.slf4j.Logger
+
 /**
  * Created by IntelliJ IDEA.
  * User: arjan
@@ -10,22 +13,18 @@ import scala.util.Random
  */
 
 object SantaRunner {
+  val log = LoggerFactory getLogger SantaRunner.getClass.getName
   def main(args:Array[String]) = {
-      val elfGroup = Group(3)
-      1 to 10 foreach {i => new Thread(new Elf(elfGroup, i)) start}
-      val reindeerGroup = Group(9)
-      1 to 9 foreach {i => new Thread(new Reindeer(reindeerGroup, i)) start}
-      val santa = new Thread(new Santa(elfGroup, reindeerGroup))
-      santa start
-//; sequence_ [ elf elf_group n | n <- [1..10] ]
-//; rein_group <- newGroup 9
-//; sequence_ [ reindeer rein_group n | n <- [1..9] ]
-//; forever (santa elf_group rein_group) }
+    System.setProperty("org.multiverse.tracing.enabled", "true")
+    val elfGroup = Group(3)
+    val reindeerGroup = Group(9)
+    val santa = new Thread(new Santa(elfGroup, reindeerGroup))
+    santa start
 
-  }
-
-  def elf(g:Group, id:Int) = {
-    
+    log.debug("starting elfs")
+    1 to 10 foreach {i => new Thread(new Elf(elfGroup, i)) start}
+    log.debug("starting reindeers")
+    1 to 9 foreach {i => new Thread(new Reindeer(reindeerGroup, i)) start}
   }
 
   def repeat[T](n:Int)(op: T):Unit = {
@@ -33,7 +32,7 @@ object SantaRunner {
   }
 
   def repeatDelayed[T](n:Int)(op: T):Unit = {
-    if (n > 0) {op; Thread.sleep(Random.nextInt(500)); repeatDelayed(n-1)(op)}
+    if (n > 0) {op; Thread.sleep(Random.nextInt(1000)); repeatDelayed(n-1)(op)}
   }
 
 }

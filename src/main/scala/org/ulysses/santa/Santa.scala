@@ -17,26 +17,30 @@ import org.ulysses.santa.SantaRunner._
  */
 
 class Santa1(elves: Group, reindeers:Group) extends Logging {
-  implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, timeout = 2 seconds)
+  implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, timeout = java.lang.Long.MAX_VALUE nanos)
 
   def choose:Unit = {
-    var gates: (String, (Gate, Gate)) = null
-    log.info("Choosing group")
     atomic {
+      var gates: (String, (Gate, Gate)) = null
       either {
         gates = chooseGroup("delivering toys", reindeers)
       } orElse {
         gates = chooseGroup("meeting in my study", elves)
       }
+      log.info("Ho ho ho, " + gates._1)
+      val in = gates._2._1
+      log.debug("Start operating in gate " + in)
+      in.operateGate
+      log.debug("Finished operating in gate " + in)
+      val out = gates._2._2
+      log.debug("Start operating out gate " + out)
+      out.operateGate
+      log.info("Finished operating out gate ")
     }
-    log.info("Ho ho ho, " + gates._1)
-    gates._2._1.operateGate
-    log.info("Finished operating in gate ")
-    gates._2._2.operateGate
-    log.info("Finished operating out gate ")    
   }
-  
+
   def chooseGroup(task: String, g: Group) : (String, (Gate, Gate)) = {
+    log.debug("Choosing group: " + task)
     val gates:(Gate, Gate) = g.awaitGroup
     (task, gates)
   }

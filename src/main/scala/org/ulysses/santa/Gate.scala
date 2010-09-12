@@ -15,15 +15,18 @@ import akka.util.duration._
  */
 
 case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
-  implicit val txFactory = TransactionFactory(blockingAllowed = true, timeout = 10 seconds)
+  implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, traceLevel=TraceLevel.Fine, timeout = java.lang.Long.MAX_VALUE nanos)
   
   def passGate: Unit = {
-    log.debug("passing gate")
+    log.debug("passing gate with ref id: " + System.identityHashCode(remaining))
     atomic {
-      val n_left = remaining.get
-      log.debug("passGate found n_left " + n_left)
-      if (n_left <= 0) retry 
-      else remaining.set(n_left - 1)
+//      log.debug("passGate found n_left " + n_left)
+      if (remaining.get <= 0) {
+        log.debug("Gate has no capacity left, retrying")
+        retry
+      }
+      log.debug("decreasing remaining capacity")
+      remaining alter(_ - 1)
     }
     log.debug("finished passing gate")
   }
@@ -38,46 +41,31 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
 
   def operateGate: Unit = {
     resetGate
-    waitForFull
+    checkFull
     log.info("Finished operating gate")
   }
 
-  private def waitForFull: Unit = {
+  private def checkFull: Unit = {
     atomic {
-      val n_left: Int = remaining.get
-      log.info("waitForFull found n_left: " + n_left)
-      if (n_left > 0) {
+      if (remaining.get > 0) {
+        log.info("Gate has remaining " + remaining + " on ref id " + System.identityHashCode(remaining))
         retry
-      } else {
-        log.debug("Gate is full, exiting wait ")
       }
+      log.debug("Gate is full, exiting wait ")
     }
   }
 
   private def resetGate: Unit = {
-    log.info("Seting gate capacity to value " + capacity)
-    atomic {  
+    atomic {
       remaining.set(capacity)
     }
-  }
-
-  private def isFull: Boolean = {
-    atomic {
-      val n_left: Int = remaining.get
-      log.debug("Found n_left: " + n_left)
-      if (n_left > 0) {
-        log.debug("Re-trying transaction")
-        false
-      } else {
-        true
-      }
-    }
+    log.debug("Finished setting gate capacity to value " + capacity + " for ref id " + System.identityHashCode(remaining))
   }
 }
 
 object Gate {
   def apply(capacity: Int): Gate = {
-    val ref = new Ref[Int](capacity)
+    val ref = new Ref[Int](0)
     Gate(capacity, ref)
   }
 }

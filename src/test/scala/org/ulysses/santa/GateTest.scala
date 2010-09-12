@@ -3,6 +3,11 @@ package org.ulysses.santa
 import se.scalablesolutions.akka.util.Logging
 import org.specs.Specification
 import java.util.concurrent.CountDownLatch
+import se.scalablesolutions.akka
+import akka.util.Logging
+import akka.stm.Ref;
+import akka.stm.local._
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,8 +21,11 @@ class GateTest extends Specification with Logging {
   implicit protected val tfn: String = this.getClass.getName
 
   "a Gate" should {
-    "have remaining == capacity - 1 if someone has passed" in {
+    "have remaining decremented if someone has passed" in {
       val g = Gate(1)
+      atomic {
+        g.remaining.set(1)
+      }
       g.passGate
       g.getRemaining must be equalTo (0)
     }
