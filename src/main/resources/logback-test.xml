@@ -14,12 +14,12 @@
     </encoder>
   </appender>
   <appender name="R" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <File>./logs/akka.log</File>
+    <File>./logs/santa.log</File>
     <encoder>
       <pattern>[%t] [%4p] [%d{ISO8601}] %c{1}: %m%n</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>./logs/akka.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+      <fileNamePattern>./logs/santa.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
     </rollingPolicy>
   </appender>
   <logger name="se.scalablesolutions" level="DEBUG"/>

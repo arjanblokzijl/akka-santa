@@ -24,7 +24,7 @@ abstract class Helper(g:Group, i:Int) extends Logging {
   }
 
   def passGate(g:Gate) = {
-     log.debug("helper " + i + " is trying to pass gate " + g)
+     log.debug("helper " + i + " is trying to pass gate " + g + " with remaining id " + System.identityHashCode(g.remaining))   
      g.passGate
   }
 }

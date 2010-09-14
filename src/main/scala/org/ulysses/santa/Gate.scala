@@ -18,37 +18,39 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
   implicit val txFactory = TransactionFactory(blockingAllowed = true, trackReads = true, traceLevel=TraceLevel.Fine, timeout = java.lang.Long.MAX_VALUE nanos)
   
   def passGate: Unit = {
-    log.debug("passing gate with ref id: " + System.identityHashCode(remaining))
     atomic {
-//      log.debug("passGate found n_left " + n_left)
-      if (remaining.get <= 0) {
+      val rem = remaining.get
+      log.debug("passGate found n_left " + rem + " for remaining ref id " + System.identityHashCode(remaining))
+      if (rem <= 0) {
         log.debug("Gate has no capacity left, retrying")
         retry
       }
       log.debug("decreasing remaining capacity")
       remaining alter(_ - 1)
+      log.debug("finished passing gate")
     }
-    log.debug("finished passing gate")
   }
 
   def getRemaining: Int = {
-    var res = 0
     atomic {
-      res = remaining.get
+      remaining.get
     }
-    res
   }
 
   def operateGate: Unit = {
-    resetGate
-    checkFull
-    log.info("Finished operating gate")
+    atomic {
+      remaining.set(capacity)
+      log.debug("Finished setting gate capacity to value " + capacity + " for ref id " + System.identityHashCode(remaining))
+    }
+    //this check seems to cause some kind of a deadlock on the gate... still need to find out why
+    //checkFull
   }
 
   private def checkFull: Unit = {
     atomic {
+      log.info("Checking whether gate is full, found remaining: " + remaining + " for ref id " + System.identityHashCode(remaining))
       if (remaining.get > 0) {
-        log.info("Gate has remaining " + remaining + " on ref id " + System.identityHashCode(remaining))
+        log.info("Gate has remaining capacity left, retrying...")
         retry
       }
       log.debug("Gate is full, exiting wait ")
@@ -56,10 +58,7 @@ case class Gate(capacity: Int, remaining: Ref[Int]) extends Logging {
   }
 
   private def resetGate: Unit = {
-    atomic {
-      remaining.set(capacity)
-    }
-    log.debug("Finished setting gate capacity to value " + capacity + " for ref id " + System.identityHashCode(remaining))
+
   }
 }
 

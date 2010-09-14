@@ -27,12 +27,19 @@ object SantaRunner {
     1 to 9 foreach {i => new Thread(new Reindeer(reindeerGroup, i)) start}
   }
 
-  def repeat[T](n:Int)(op: T):Unit = {
+  def repeat[T](n:Int)(op: => T):Unit = {
     if (n > 0) {op; repeat(n-1)(op)}
   }
 
-  def repeatDelayed[T](n:Int)(op: T):Unit = {
-    if (n > 0) {op; Thread.sleep(Random.nextInt(1000)); repeatDelayed(n-1)(op)}
+  def repeatDelayed[T](n:Int)(op: => T):Unit = {
+    log.info("Delayed repeat with n: " + n)
+    if (n > 0) {
+      op
+      val r = Random.nextInt(1000)
+      log.debug("sleeping for " + r + " millis before entering new op")
+      Thread.sleep(Random.nextInt(1000))
+      repeatDelayed(n-1)(op)
+    }
   }
 
 }

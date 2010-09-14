@@ -27,9 +27,10 @@ class Santa1(elves: Group, reindeers:Group) extends Logging {
       } orElse {
         gates = chooseGroup("meeting in my study", elves)
       }
+//      val gates: (String, (Gate, Gate)) = chooseGroup("meeting in my study", elves)
       log.info("Ho ho ho, " + gates._1)
       val in = gates._2._1
-      log.debug("Start operating in gate " + in)
+      log.debug("Start operating in gate " + in + " with remaining ref id: " + System.identityHashCode(in.remaining))
       in.operateGate
       log.debug("Finished operating in gate " + in)
       val out = gates._2._2

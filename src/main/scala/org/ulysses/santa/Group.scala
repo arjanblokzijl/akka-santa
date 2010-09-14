@@ -39,8 +39,8 @@ case class Group(capacity:Int, ref: Ref[(Int, Gate, Gate)]) extends Logging {
         ref.set(rem, ref.get._2, ref.get._3)
         log.debug("Set remaining capacity of group to " + rem)
       }
+      (ref.get._2, ref.get._3)
     }
-    (ref.get._2, ref.get._3)
   }
 
   def awaitGroup: (Gate, Gate) = {
