@@ -7,7 +7,7 @@ import se.scalablesolutions.akka
 import akka.util.Logging
 import akka.stm.Ref;
 import akka.stm.local._
-
+import org.ulysses.santa.TestUtils._
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,38 +20,67 @@ import akka.stm.local._
 class GateTest extends Specification with Logging {
   implicit protected val tfn: String = this.getClass.getName
 
-  "a Gate" should {
-    "have remaining decremented if someone has passed" in {
-      val g = Gate(1)
-      atomic {
-        g.remaining.set(1)
+//  "a Gate" should {
+//    "have remaining decremented if someone has passed" in {
+//      val g = Gate(1)
+//      atomic {
+//        g.remaining.set(1)
+//      }
+//      g.passGate
+//      g.getRemaining must be equalTo (0)
+//    }
+//  }
+//
+//  "a Gate" should {
+//    "Operate when everyone joined" in {
+//      val doneSignal = new CountDownLatch(2);
+//      val operateSignal = new CountDownLatch(1);
+//
+//      val g = Gate(2)
+//      val opt = new TestThread(operateSignal, {g.operateGate})
+//      opt.start
+//      Thread.sleep(10)
+//
+//      val t1 = new TestThread(doneSignal, {g.passGate})
+//      val t2 = new TestThread(doneSignal, {g.passGate})
+//      t1.start
+//      t2.start
+//
+//      log.debug("countDown for workers started")
+//      operateSignal.await
+//      doneSignal.await
+//      log.debug("doneSignal has finished")
+//      g.getRemaining must be equalTo (0)
+//    }
+//}
+
+    "a Gate" should {
+      "operate and wait for gate to be full" in {
+        val doneSignal = new CountDownLatch(2);
+        val operateSignal = new CountDownLatch(1);
+
+        val g = Gate(2)
+        Thread.sleep(5000)
+        val t1 = new TestThread(doneSignal, {g.passGate})
+        val t2 = new TestThread(doneSignal, {g.passGate})
+        val t3 = new TestThread(doneSignal, {g.passGate})
+        t1.start
+        Thread.sleep(5000)
+        t2.start
+
+        Thread.sleep(5000)
+        val opt = new TestThread(operateSignal, {g.operateGate})
+        opt.start
+
+        Thread.sleep(500000)
+        log.debug("countDown for workers started")
+//        operateSignal.await
+//        doneSignal.await
+        log.debug("doneSignal has finished")
+        numOfLiveThreads(t1, t2) must be equalTo(0)
+        
+        g.getRemaining must be equalTo (0)
       }
-      g.passGate
-      g.getRemaining must be equalTo (0)
-    }
-  }
-
-  "a Gate" should {
-    "Operate when everyone joined" in {
-      val doneSignal = new CountDownLatch(2);
-      val operateSignal = new CountDownLatch(1);
-
-      val g = Gate(2)
-      val opt = new TestThread(operateSignal, {g.operateGate})
-      opt.start
-      Thread.sleep(10)
-
-      val t1 = new TestThread(doneSignal, {g.passGate})
-      val t2 = new TestThread(doneSignal, {g.passGate})
-      t1.start
-      t2.start
-
-      log.debug("countDown for workers started")
-      operateSignal.await
-      doneSignal.await
-      log.debug("doneSignal has finished")
-      g.getRemaining must be equalTo (0)
-
     }
 
     def op(g: Gate): Unit = {
@@ -63,6 +92,5 @@ class GateTest extends Specification with Logging {
     def pass(g: Gate): Unit = {
       g.passGate
     }
-  }
 }
 

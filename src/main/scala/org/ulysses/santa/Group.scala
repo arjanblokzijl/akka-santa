@@ -31,7 +31,6 @@ case class Group(capacity:Int, ref: Ref[(Int, Gate, Gate)]) extends Logging {
       val n_left = ref.get._1
       if (n_left <= 0) {
         log.debug("Group's capacity is zero retrying transaction...")
-        //Thread.sleep(100)
         retry
       }
       else {

@@ -32,7 +32,6 @@ object SantaRunner {
   }
 
   def repeatDelayed[T](n:Int)(op: => T):Unit = {
-    log.info("Delayed repeat with n: " + n)
     if (n > 0) {
       op
       val r = Random.nextInt(1000)

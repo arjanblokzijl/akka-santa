@@ -22,9 +22,9 @@
       <fileNamePattern>./logs/santa.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
     </rollingPolicy>
   </appender>
-  <logger name="se.scalablesolutions" level="DEBUG"/>
-    <logger name="se.scalablesolutions.akka.stm" level="TRACE"/>
-  <logger name="org.ulysses" level="DEBUG"/>
+  <logger name="se.scalablesolutions" level="INFO"/>
+    <logger name="se.scalablesolutions.akka.stm" level="INFO"/>
+  <logger name="org.ulysses" level="INFO"/>
   <root level="debug">
     <appender-ref ref="stdout"/>
     <appender-ref ref="R"/>
