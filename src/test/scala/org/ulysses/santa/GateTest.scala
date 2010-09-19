@@ -65,17 +65,16 @@ class GateTest extends Specification with Logging {
         val t2 = new TestThread(doneSignal, {g.passGate})
         val t3 = new TestThread(doneSignal, {g.passGate})
         t1.start
-        Thread.sleep(5000)
+        Thread.sleep(100)
         t2.start
 
-        Thread.sleep(5000)
+        Thread.sleep(100)
         val opt = new TestThread(operateSignal, {g.operateGate})
         opt.start
 
-        Thread.sleep(500000)
         log.debug("countDown for workers started")
-//        operateSignal.await
-//        doneSignal.await
+        operateSignal.await
+        doneSignal.await
         log.debug("doneSignal has finished")
         numOfLiveThreads(t1, t2) must be equalTo(0)
         
